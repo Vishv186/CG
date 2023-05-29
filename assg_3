@@ -1,0 +1,89 @@
+#include <iostream>
+#include <GL/glut.h>
+
+using namespace std;
+
+void EightSemetry(int x, int y, int p, int q){
+	glColor3f(1,0,0);
+	glPointSize(4);
+    // 1st quadrant
+    glBegin(GL_POINTS);
+    glVertex2i(y+p,-x+q);
+    glVertex2i(x+p,-y+q);
+    //4th quadrant
+    glColor3f(0,1,0);
+    glVertex2i(x+p,y+q);
+    glVertex2i(y+p,x+q);
+    //2nd quadrant
+    glColor3f(1,1,0);
+    glVertex2i(-x+p,-y+q);
+    glVertex2i(-y+p,-x+q);
+    //3rd quadrant
+    glColor3f(1,0,1);
+    glVertex2i(-x+p,y+q);
+    glVertex2i(-y+p,x+q);
+    glEnd();
+    glFlush();
+}
+
+void Bresenham(int r){
+    int p, q, x, y, d;
+
+    p = 300;
+    q = 300;
+    d = 3 - (2*r);
+    x = 0;
+    y = r;
+
+    EightSemetry(x,y,p,q);
+
+    while(x <= y){
+        if (d < 0){
+            d += (4*x) + 6;
+            x++;
+        }
+        else if(d >= 0){
+            d += (4*(x-y)) + 10;
+            x++;
+            y--;
+        }
+        EightSemetry(x,y,p,q);
+    }
+}
+
+void initialize()
+{
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    gluOrtho2D(0, 600, 600, 0);
+}
+
+void initialaxis(){
+    glColor3f(0,0,0);
+    glLineWidth(2);
+    glBegin(GL_LINES);
+    glVertex2i(300, 0);
+    glVertex2i(300, 600);
+    glVertex2i(0, 300);
+    glVertex2i(600, 300);
+    glEnd();
+	glFlush();
+}
+
+int main(int argc, char **argv){
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE);
+    glutInitWindowSize(600, 600);
+    glutInitWindowPosition(800, 100);
+    glutCreateWindow("Bresenham Algorithm");
+    initialize();
+    glutDisplayFunc(initialaxis);
+    cout << "Program to draw Circle using Bresenham's Circle drawing algorithm: " << endl;
+    cout << "-------------------------------------------------------------------" << endl;
+    int radius;
+    cout << "Enter the radius of the circle: ";
+    cin >> radius;
+    Bresenham(radius);
+    glutMainLoop();
+    return 0;
+}
