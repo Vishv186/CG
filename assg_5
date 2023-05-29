@@ -1,0 +1,453 @@
+#include <iostream>
+#include <math.h>
+#include <time.h>
+#include <GL/glut.h>
+
+using namespace std;
+int wind[4][2];
+int points[10][2];
+int edge;
+int ch;
+int ct = 0;
+
+drawWindow(){
+    glColor3f(0,0,0);
+    glBegin(GL_LINE_LOOP);
+    glVertex2i(wind[0][0],wind[0][1]);
+    glVertex2i(wind[1][0],wind[0][1]);
+    glVertex2i(wind[1][0],wind[1][1]);
+    glVertex2i(wind[0][0],wind[1][1]);
+    glEnd();
+    glFlush();
+
+    cout << wind[0][0] << " , " << wind[0][1] << endl;
+    cout << wind[1][0] << " , " << wind[0][1] << endl;
+    cout << wind[1][0] << " , " << wind[1][1] << endl;
+    cout << wind[0][0] << " , " << wind[1][1] << endl;
+}
+
+void Draw(float x, float y, float z) {
+  glClearColor(1.0, 1.0, 1.0, 0.0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glColor3f(x, y, z);
+  glBegin(GL_POLYGON);
+  for (int i = 0; i < edge; i++) {
+    glVertex2i(points[i][0], points[i][1]);
+  }
+  glEnd();
+  glFlush();
+  drawWindow();
+}
+
+int BottomCliping(int e) {
+  float m = 0;
+  int x = 0, k = 0;
+  int t[10][2];
+  for (int i = 0; i < e; i++) {
+    if (points[i][1] < wind[0][1]) {
+
+      if (points[i + 1][1] < wind[0][1]) {
+
+      } else if (points[i + 1][1] > wind[0][1]) {
+        float x1, x2;
+        float y1, y2;
+        x1 = points[i][0];
+        y1 = points[i][1];
+        x2 = points[i + 1][0];
+        y2 = points[i + 1][1];
+        x = ((1 / ((y2 - y1) / (x2 - x1))) * (wind[0][1] - y1)) + x1;
+        t[k][0] = x;
+        t[k][1] = wind[0][1];
+        k++;
+
+      }
+
+    } else if (points[i][1] > wind[0][1]) {
+
+      if (points[i + 1][1] > wind[0][1]) {
+        t[k][0] = points[i][0];
+        t[k][1] = points[i][1];
+        k++;
+      } else if (points[i + 1][1] < wind[0][1]) {
+        float x1, x2;
+        float y1, y2;
+        x1 = points[i][0];
+        y1 = points[i][1];
+        x2 = points[i + 1][0];
+        y2 = points[i + 1][1];
+
+        x = ((1 / ((y2 - y1) / (x2 - x1))) * (wind[0][1] - y1)) + x1;
+
+        t[k][0] = x1;
+        t[k][1] = y1;
+        k++;
+        t[k][0] = x;
+        t[k][1] = wind[0][1];
+        k++;
+
+      }
+
+    }
+
+  }
+  cout << "k = " << k;
+  for (int i = 0; i < 10; i++) {
+    points[i][0] = 0;
+    points[i][1] = 0;
+
+  }
+
+  for (int i = 0; i < k; i++) {
+    cout << "\n" << t[i][0] << " " << t[i][1];
+    points[i][0] = t[i][0];
+    points[i][1] = t[i][1];
+
+  }
+  points[k][0] = points[0][0];
+  points[k][1] = points[0][1];
+  return k;
+}
+
+int TopCliping(int e) {
+  float m = 0;
+  int x = 0, k = 0;
+  int t[10][2];
+  for (int i = 0; i < e; i++) {
+    if (points[i][1] > wind[1][1]) {
+
+      if (points[i + 1][1] > wind[1][1]) {
+
+      } else if (points[i + 1][1] < wind[1][1]) {
+        float x1, x2;
+        float y1, y2;
+        x1 = points[i][0];
+        y1 = points[i][1];
+        x2 = points[i + 1][0];
+        y2 = points[i + 1][1];
+        x = ((1 / ((y2 - y1) / (x2 - x1))) * (wind[1][1] - y1)) + x1;
+        t[k][0] = x;
+        t[k][1] = wind[1][1];
+        k++;
+
+      }
+
+    } else if (points[i][1] < wind[1][1]) {
+
+      if (points[i + 1][1] < wind[1][1]) {
+        t[k][0] = points[i][0];
+        t[k][1] = points[i][1];
+        k++;
+      } else if (points[i + 1][1] > wind[1][1]) {
+        float x1, x2;
+        float y1, y2;
+        x1 = points[i][0];
+        y1 = points[i][1];
+        x2 = points[i + 1][0];
+        y2 = points[i + 1][1];
+
+        x = ((1 / ((y2 - y1) / (x2 - x1))) * (wind[1][1] - y1)) + x1;
+
+        t[k][0] = x1;
+        t[k][1] = y1;
+        k++;
+        t[k][0] = x;
+        t[k][1] = wind[1][1];
+        k++;
+
+      }
+
+    }
+
+  }
+  cout << "k = " << k;
+  for (int i = 0; i < 10; i++) {
+
+    points[i][0] = 0;
+    points[i][1] = 0;
+
+  }
+
+  for (int i = 0; i < k; i++) {
+    cout << "\n" << t[i][0] << " " << t[i][1];
+    points[i][0] = t[i][0];
+    points[i][1] = t[i][1];
+
+  }
+  points[k][0] = points[0][0];
+  points[k][1] = points[0][1];
+  return k;
+}
+
+
+int leftCliping(int e) {
+  float m = 0;
+  int y = 0, k = 0;
+  int t[10][2];
+  for (int i = 0; i < e; i++) {
+
+    if (points[i][0] < wind[0][0]) {
+
+      if (points[i + 1][0] < wind[0][0]) {
+        cout << "\n Test 1";
+
+      } else if (points[i + 1][0] > wind[0][0]) {
+        cout << "\n Test 2";
+        float x1, x2;
+        float y1, y2;
+        x1 = points[i][0];
+        y1 = points[i][1];
+        x2 = points[i + 1][0];
+        y2 = points[i + 1][1];
+        y = (((y2 - y1) / (x2 - x1)) * (wind[0][0] - x1)) + y1;
+        t[k][0] = wind[0][0];
+        t[k][1] = y;
+        k++;
+      }
+    } else if (points[i][0] > wind[0][0]) {
+
+      if (points[i + 1][0] > wind[0][0]) {
+
+        t[k][0] = points[i][0];
+        t[k][1] = points[i][1];
+        k++;
+      } else if (points[i + 1][0] < wind[0][0]) {
+
+        float x1, x2;
+        float y1, y2;
+        x1 = points[i][0];
+        y1 = points[i][1];
+        x2 = points[i + 1][0];
+        y2 = points[i + 1][1];
+
+        y = ((y2 - y1) / (x2 - x1) * (wind[0][0] - x1)) + y1;
+
+        t[k][0] = x1;
+        t[k][1] = y1;
+        k++;
+        t[k][0] = wind[0][0];
+        t[k][1] = y;
+        k++;
+      }
+
+    }
+  }
+  cout << "k = " << k;
+  for (int i = 0; i < 10; i++) {
+    points[i][0] = 0;
+    points[i][1] = 0;
+
+  }
+
+  for (int i = 0; i < k; i++) {
+    cout << "\n" << t[i][0] << " " << t[i][1];
+    points[i][0] = t[i][0];
+    points[i][1] = t[i][1];
+
+  }
+  points[k][0] = points[0][0];
+  points[k][1] = points[0][1];
+  return k;
+}
+
+int RightCliping(int e) {
+
+  float m = 0;
+  int y = 0, k = 0;
+  int t[10][2];
+  for (int i = 0; i < e; i++) {
+
+    if (points[i][0] > wind[1][0]) {
+
+      if (points[i + 1][0] > wind[1][0]) {
+
+      } else if (points[i + 1][0] < wind[1][0]) {
+
+        float x1, x2;
+        float y1, y2;
+        x1 = points[i][0];
+        y1 = points[i][1];
+        x2 = points[i + 1][0];
+        y2 = points[i + 1][1];
+        y = (((y2 - y1) / (x2 - x1)) * (wind[1][0] - x1)) + y1;
+        t[k][0] = wind[1][0];
+        t[k][1] = y;
+        k++;
+      }
+
+    } else if (points[i][0] < wind[1][0]) {
+
+      if (points[i + 1][0] < wind[1][0]) {
+
+        t[k][0] = points[i][0];
+        t[k][1] = points[i][1];
+        k++;
+      } else if (points[i + 1][0] > wind[1][0]) {
+
+        float x1, x2;
+        float y1, y2;
+        x1 = points[i][0];
+        y1 = points[i][1];
+        x2 = points[i + 1][0];
+        y2 = points[i + 1][1];
+
+        y = ((y2 - y1) / (x2 - x1) * (wind[1][0] - x1)) + y1;
+        t[k][0] = x1;
+        t[k][1] = y1;
+        k++;
+        t[k][0] = wind[1][0];
+        t[k][1] = y;
+        k++;
+      }
+    }
+  }
+  cout << "k = " << k;
+  for (int i = 0; i < 10; i++) {
+    points[i][0] = 0;
+    points[i][1] = 0;
+
+  }
+  for (int i = 0; i < k; i++) {
+    cout << "\n" << t[i][0] << " " << t[i][1];
+    points[i][0] = t[i][0];
+    points[i][1] = t[i][1];
+
+  }
+  points[k][0] = points[0][0];
+  points[k][1] = points[0][1];
+  return k;
+}
+
+void goMenu(int value) {
+  switch (value) {
+
+  case 1:
+    edge = leftCliping(edge);
+    Draw(1.0,0.0,0.0);
+    break;
+  case 2:
+    edge = RightCliping(edge);
+    Draw(1.0,0.0,0.0);
+    break;
+  case 3:
+    edge = TopCliping(edge);
+    Draw(1.0,0.0,0.0);
+    break;
+  case 4:
+    edge = BottomCliping(edge);
+    Draw(1.0,0.0,0.0);
+    break;
+  }
+  glutPostRedisplay();
+}
+
+void mouse(int button, int state, int x, int y)
+{
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    {
+        if (ch == 1)
+		{
+			points[edge][0] = x;
+			points[edge][1] = y;
+            edge += 1;
+        }
+        if (ch == 2)
+		{
+            if (ct == 0){
+                wind[0][0] = x;
+                wind[0][1] = y;
+                ct++;
+            }
+            else if(ct == 1){
+                wind[1][0] = x;
+                wind[1][1] = y;
+                drawWindow();
+                ch = 4;
+            }
+        }
+    }
+    if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+    {
+        glutCreateMenu(goMenu);
+        glutAddMenuEntry("Left Clipping", 1);
+        glutAddMenuEntry("Right Clipping", 2);
+        glutAddMenuEntry("Bottom Clipping", 3);
+        glutAddMenuEntry("Top Clipping", 4);
+        glutAttachMenu(GLUT_RIGHT_BUTTON);
+    }
+
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
+		case 'c':
+		{
+			ch = 1;
+			cout << "Choose points for polygon" << endl;
+			glutMouseFunc(mouse);
+			break;
+		}
+		case 't':
+		{
+			ch = 2;
+			cout << "Select the window pos" << endl;
+			glutMouseFunc(mouse);
+			break;
+		}
+		case 'd':
+		{
+			ch = 3;
+			cout << "To display polygon" << endl;
+			if(edge >= 2){
+          Draw(1.0,1.0,0.0);
+			}
+			break;
+		}
+		case 'x':
+		{
+            for(int x=0; x <= edge; x++){
+                points[x][0] = -1;
+                points[x][1] = -1;
+            }
+			cout << "Queue is cleared" << endl;
+			break;
+		}
+		case 'X':
+		{
+			glClearColor(1.0, 1.0, 1.0, 1.0);
+    		glClear(GL_COLOR_BUFFER_BIT);
+			cout << "Screen is cleared" << endl;
+			break;
+		}
+    }
+    glutPostRedisplay();
+}
+
+void P_C() {
+    glColor3f(0,0,0);
+    glBegin(GL_POINTS);
+	glVertex2i(0,0);	
+    glEnd();
+	glFlush();
+    glutKeyboardFunc(keyboard);
+}
+
+void init() {
+  glClearColor(1.0, 1.0, 1.0, 0.0);
+  glMatrixMode(GL_PROJECTION);
+  gluOrtho2D(0, 600, 600, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
+}
+
+int main(int argc, char ** argv) {
+  glutInit( & argc, argv);
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+  glutInitWindowSize(600, 600);
+  glutInitWindowPosition(200, 200);
+  glutCreateWindow("Polygon Clipping");
+  init();
+  glutDisplayFunc(P_C);
+  glutMainLoop();
+  return 0;
+}
