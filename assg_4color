@@ -1,0 +1,347 @@
+#include <GL/glut.h>
+#include <iostream>
+#include <math.h>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int ch = 0;
+vector<int> arr;
+int ct = 0;
+float colorarr[] = {1.0,0.0,0.0};
+float flc[] = {};
+void copyarr(float* arr1){
+	for(int i=0; i<3; i++){
+		flc[i] = arr1[i];
+	}
+}
+
+void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3){
+    glColor3f(0,0,0);
+    glBegin(GL_LINE_LOOP);
+	glVertex2i(x1,y1);	
+	glVertex2i(x2,y2);	
+	glVertex2i(x3,y3);
+    glEnd();
+	glFlush();
+}
+
+void drawCircle(int x1, int y1, int x2, int y2){
+	int r1 = abs(x2-x1);
+	int r2 = abs(y2-y1);
+	int r = sqrt(pow(r1,2)+pow(r2,2));
+	float angle;
+    glColor3f(0,0,0);
+    glPointSize(2);
+    glBegin(GL_POINTS);
+        for (int i = 0; i < 360; i++) {
+            angle = i * M_PI / 180;
+            glVertex2f(x1 + r * cos(angle),
+                       y1 + r * sin(angle));
+        }
+    glEnd();
+    glPointSize(1);
+	glFlush();
+}
+
+void drawQuadritaleral(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4){
+    glColor3f(0,0,0);
+    glBegin(GL_LINE_LOOP);
+	glVertex2i(x1,y1);	
+	glVertex2i(x2,y2);	
+	glVertex2i(x3,y3);
+	glVertex2i(x4,y4);
+    glEnd();
+	glFlush();
+}
+
+void drawSquare(){
+    glColor3f(0,0,0);
+	glLineWidth(5);
+    glBegin(GL_LINE_LOOP);
+	glVertex2i(100,100);	
+	glVertex2i(200,100);	
+	glVertex2i(200,200);
+	glVertex2i(100,200);
+    glEnd();
+	glFlush();
+}
+
+void BoundaryFill4(int x, int y, float* flc, float* bdc){
+	float gtpx[3];
+    glReadPixels(x, 600-y, 1.0, 1.0, GL_RGB, GL_FLOAT, gtpx);
+    if (((gtpx[0] != flc[0]) || (gtpx[1] != flc[1]) || (gtpx[2] != flc[2])) && 
+	((gtpx[0] != bdc[0]) || (gtpx[1] != bdc[1]) || (gtpx[2] != bdc[2]))){
+		if((x < 600) && (x > 0) && (y < 600) && (y > 0)){
+			glColor3f(flc[0],flc[1],flc[2]);
+			glBegin(GL_POINTS);
+			glVertex2i(x,y);
+			glEnd();
+			glFlush();
+			BoundaryFill4(x+1,y,flc,bdc);
+			BoundaryFill4(x,y-1,flc,bdc);
+			BoundaryFill4(x-1,y,flc,bdc);
+			BoundaryFill4(x,y+1,flc,bdc);
+		}
+    }
+}
+
+void BoundaryFill8(int x, int y, float* flc, float* bdc){
+	float gtpx[3];
+    glReadPixels(x, 600-y, 1.0, 1.0, GL_RGB, GL_FLOAT, gtpx);
+    if (((gtpx[0] != flc[0]) || (gtpx[1] != flc[1]) || (gtpx[2] != flc[2])) && 
+	((gtpx[0] != bdc[0]) || (gtpx[1] != bdc[1]) || (gtpx[2] != bdc[2]))){
+		if((x < 600) && (x > 0) && (y < 600) && (y > 0)){
+			glColor3f(flc[0],flc[1],flc[2]);
+			glBegin(GL_POINTS);
+			glVertex2i(x,y);
+			glEnd();
+			glFlush();
+			BoundaryFill8(x+1,y,flc,bdc);
+			BoundaryFill8(x,y-1,flc,bdc);
+			BoundaryFill8(x-1,y,flc,bdc);
+			BoundaryFill8(x,y+1,flc,bdc);
+			BoundaryFill8(x+1,y+1,flc,bdc);
+			BoundaryFill8(x+1,y-1,flc,bdc);
+			BoundaryFill8(x-1,y-1,flc,bdc);
+			BoundaryFill8(x-1,y+1,flc,bdc);
+		}
+    }
+}
+
+void FloodFill4(int x, int y, float* flc, float* odc){
+	float gtpx[3];
+    glReadPixels(x, 600-y, 1.0, 1.0, GL_RGB, GL_FLOAT, gtpx);
+	if((gtpx[0] == odc[0]) && (gtpx[1] == odc[1]) && (gtpx[2] == odc[2])){
+		if((x < 600) && (x > 0) && (y < 600) && (y > 0)){
+			glColor3f(flc[0],flc[1],flc[2]);
+			glBegin(GL_POINTS);
+			glVertex2i(x,y);
+			glEnd();
+			glFlush();
+			FloodFill4(x+1,y,flc,odc);
+			FloodFill4(x,y-1,flc,odc);
+			FloodFill4(x-1,y,flc,odc);
+			FloodFill4(x,y+1,flc,odc);
+		}
+    }
+}
+
+void FloodFill8(int x, int y, float* flc, float* odc){
+	float gtpx[3];
+    glReadPixels(x, 600-y, 1.0, 1.0, GL_RGB, GL_FLOAT, gtpx);
+	if((gtpx[0] == odc[0]) && (gtpx[1] == odc[1]) && (gtpx[2] == odc[2])){
+		if((x < 600) && (x > 0) && (y < 600) && (y > 0)){
+			glColor3f(flc[0],flc[1],flc[2]);
+			glBegin(GL_POINTS);
+			glVertex2i(x,y);
+			glEnd();
+			glFlush();
+			FloodFill8(x+1,y,flc,odc);
+			FloodFill8(x,y-1,flc,odc);
+			FloodFill8(x-1,y,flc,odc);
+			FloodFill8(x,y+1,flc,odc);
+			FloodFill8(x+1,y+1,flc,odc);
+			FloodFill8(x+1,y-1,flc,odc);
+			FloodFill8(x-1,y-1,flc,odc);
+			FloodFill8(x-1,y+1,flc,odc);
+		}
+    }
+}
+
+void mouse(int button, int state, int x, int y)
+{
+	int sz = arr.size();
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    {
+        if (ch == 1)
+		{
+			if (sz < 6){
+				arr.push_back(x);
+				arr.push_back(y);
+			}
+			sz = arr.size();
+			if (sz == 6){
+            	drawTriangle(arr.at(0),arr.at(1),arr.at(2),arr.at(3),arr.at(4),arr.at(5));
+				arr.clear();
+			}
+        }
+        if (ch == 2)
+		{
+			if (sz < 4){
+				arr.push_back(x);
+				arr.push_back(y);
+			}
+			sz = arr.size();
+			if (sz == 4){
+            	drawCircle(arr.at(0),arr.at(1),arr.at(2),arr.at(3));
+				arr.clear();
+			}
+        }
+        if (ch == 3)
+		{
+			if (sz < 8){
+				arr.push_back(x);
+				arr.push_back(y);
+			}
+			sz = arr.size();
+			if (sz == 8){
+            	drawQuadritaleral(arr.at(0),arr.at(1),arr.at(2),arr.at(3),arr.at(4),arr.at(5),arr.at(6),arr.at(7));
+				arr.clear();
+			}
+        }
+        if (ch == 4)
+		{
+			copyarr(colorarr);
+			float odc[] = {1.0,1.0,1.0};
+			FloodFill4(x,y,flc,odc);
+        }
+        if (ch == 5)
+		{
+			copyarr(colorarr);
+			float bdc[] = {0.0,0.0,0.0};
+			BoundaryFill4(x,y,flc,bdc);
+        }
+    }
+    else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+	{
+		if(ct % 6 == 0){
+			colorarr[0] = 1.0;
+			colorarr[1] = 0.0;
+			colorarr[2] = 0.0;
+			cout << "Red color is choosen" << endl;
+		}
+		else if(ct % 6 == 1){
+			colorarr[0] = 0.0;
+			colorarr[1] = 1.0;
+			colorarr[2] = 0.0;
+			cout << "Green  color is choosen" << endl;
+		}
+		else if(ct % 6 == 2){
+			colorarr[0] = 0.0;
+			colorarr[1] = 0.0;
+			colorarr[2] = 1.0;
+			cout << "Blue  color is choosen" << endl;
+		}
+		else if(ct % 6 == 3){
+			colorarr[0] = 1.0;
+			colorarr[1] = 1.0;
+			colorarr[2] = 0.0;
+			cout << "Yellow color is choosen" << endl;
+		}
+		else if(ct % 6 == 4){
+			colorarr[0] = 0.0;
+			colorarr[1] = 1.0;
+			colorarr[2] = 1.0;
+			cout << "Cyan  color is choosen" << endl;
+		}
+		else if(ct % 6 == 5){
+			colorarr[0] = 1.0;
+			colorarr[1] = 0.0;
+			colorarr[2] = 1.0;
+			cout << "Magenta  color is choosen" << endl;
+		}
+		ct++;
+	}
+    glFlush();
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
+		case 't':
+		{
+			ch = 1;
+			cout << "Triangle is opted" << endl;
+			glutMouseFunc(mouse);
+			break;
+		}
+		case 'c':
+		{
+			ch = 2;
+			cout << "Circle is opted" << endl;
+			glutMouseFunc(mouse);
+			break;
+		}
+		case 'q':
+		{
+			ch = 3;
+			cout << "Quadrilateral is opted" << endl;
+			glutMouseFunc(mouse);
+			break;
+		}
+		case 'f':
+		{
+			ch = 4;
+			cout << "Flood Fill is opted" << endl;
+			glutMouseFunc(mouse);
+			break;
+		}
+		case 'b':
+		{
+			ch = 5;
+			cout << "Boundary Fill is opted" << endl;
+			glutMouseFunc(mouse);
+			break;
+		}
+		case 'x':
+		{
+			arr.clear();
+			cout << "Queue is cleared" << endl;
+			break;
+		}
+		case 'X':
+		{
+			glClearColor(1.0, 1.0, 1.0, 1.0);
+    		glClear(GL_COLOR_BUFFER_BIT);
+			cout << "Screen is cleared" << endl;
+			break;
+		}
+    }
+    glutPostRedisplay();
+}
+
+void initialize()
+{
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    gluOrtho2D(0, 600, 600, 0);
+}
+
+void initialaxis(){
+	glColor3f(0,0,0);
+    glBegin(GL_POINTS);
+	glVertex2i(0,0);	
+    glEnd();
+	glFlush();
+    glutKeyboardFunc(keyboard);
+}
+
+int main(int argc, char **argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE);
+    glutInitWindowSize(600, 600);
+    glutInitWindowPosition(800, 100);
+    glutCreateWindow("Filling Algorithm");
+	initialize();
+    cout << "Choose your Line type: " << endl;
+    cout << "--------------------------------------------" << endl;
+    cout << "t => Triangle" << endl;
+    cout << "c => Circle" << endl;
+    cout << "q => Quadrilateral" << endl;
+    cout << "--------------------------------------------" << endl;
+    cout << "f => Flood Fill" << endl;
+    cout << "b => Boundary Fill" << endl;
+	cout << "--------------------------------------------" << endl;
+	cout << "x => clear the queue" << endl;
+	cout << "X => screen the queue" << endl;
+	cout << "Right Click to change the color" << endl;
+    cout << "--------------------------------------------" << endl;
+    glutDisplayFunc(initialaxis);
+    glutMainLoop();
+    return 0;
+}
+
